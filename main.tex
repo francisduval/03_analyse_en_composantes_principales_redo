@@ -366,20 +366,20 @@ Italy      -0.4717928  0.16749598  0.68851406
         \item[-] L'ACP permet donc de réduire le nombre de variables dans un jeu de données tout en \motcle{préservant un maximum d'information}.
         \item[-] On souhaite décrire la variablilité (l'inertie) présente dans un ensemble de variables initiales corrélées
         \begin{align*}
-            X_1, \dots, X_k
+            X_1, \dots, X_p
         \end{align*}
         à l'aide d'un nouvel ensemble de variables non-corrélées
         \begin{align*}
-            PC_1, \dots, PC_k,
+            PC_1, \dots, PC_q,
         \end{align*}
         appelées \motcle{composantes principales}.
-        \item[-] Chacune des nouvelles variables $PC_j, j = 1, \dots, k$, est une combinaison linéaire des variables initiales $X_j, j = 1, \dots, k$:
+        \item[-] Chacune des nouvelles variables $PC_j, j = 1, \dots, q$, est une combinaison linéaire des variables initiales $X_j, j = 1, \dots, q$:
         \begin{align*}
-            PC_j = a_{j1} X_1 + a_{j2} X_2 + \dots + a_{jk} X_k.
+            PC_j = a_{j1} X_1 + a_{j2} X_2 + \dots + a_{jk} X_p.
         \end{align*}
-        \item[-] Pour réduire la dimensionnalité, l'ACP \motcle{projette} (de manière optimale) le nuage de points des observations dans $\mathbb{R}^k$ dans l'espace $\mathbb{R}^{k^*}$, où $k^* < k$.
-        \item[-] « Préserver un maximum d'information » signifie qu'on veut que 2 points qui sont \motcle{proches dans l'espace $\mathbb{R}^k$} soient également \motcle{proches dans l'espace $\mathbb{R}^{k^*}$}. 
-        \item[-] De la même manière, on veut que 2 points qui sont \motcle{éloignés dans l'espace $\mathbb{R}^k$} soient également \motcle{éloignés dans l'espace $\mathbb{R}^{k^*}$}.
+        \item[-] Pour réduire la dimensionnalité, l'ACP \motcle{projette} (de manière optimale) le nuage de points des observations dans $\mathbb{R}^p$ dans l'espace $\mathbb{R}^{q}$, où $q < p$.
+        \item[-] « Préserver un maximum d'information » signifie qu'on veut que 2 points qui sont \motcle{proches dans l'espace $\mathbb{R}^p$} soient également \motcle{proches dans l'espace $\mathbb{R}^q$}. 
+        \item[-] De la même manière, on veut que 2 points qui sont \motcle{éloignés dans l'espace $\mathbb{R}^p$} soient également \motcle{éloignés dans l'espace $\mathbb{R}^q$}.
     \end{itemize}
     \fleche C'est par le fait même un outil de \motcle{visualisation des données} puisqu'elle permet de visualiser des jeux de données en plus de 3 dimensions.
 \end{itemize}
@@ -1478,7 +1478,7 @@ Man  0.9543009 0.001144025
         \end{align*}
         \blt les \motcle{loadings} sont les \motcle{corrélations entre les variables et les composantes principales}:
         \begin{align*}
-            a_{j\alpha} = \text{Cor}(\boldsymbol{x}^j, \boldsymbol{f}^\alpha).
+            a_{j\alpha} = \text{Cor}(\boldsymbol{x}^j, \boldsymbol{f}^\alpha) = \sqrt{\lambda_\alpha} v_{j\alpha}.
         \end{align*}
     \end{itemize}
 \end{itemize}
@@ -1493,21 +1493,655 @@ Cette dernière propriété est importante, car elle permet de connecter la repr
 
 % ------------------------------------------------------------------------------------------------------------------------------
 
-\begin{frame}{Variance des composantes principales}
+\begin{frame}[fragile]{Variance des composantes principales}
     
 
 \begin{itemize}
-    \fleche Les composantes principales (colonnes de $\boldsymbol{F}$) sont \motclef{$q$ nouvelles variables} non corrélées et de variance maximale, avec
+    \fleche Les composantes principales (colonnes de $\boldsymbol{F}$) sont \motclef{$q$ nouvelles variables non corrélées} et de \motcle{variance maximale}, avec
     \begin{align*}
         \text{Var}(\boldsymbol{f}^\alpha) = \lambda_\alpha.
     \end{align*}
-    \fleche Il en découle que l'inertie du nuage des observations projeté sur les $q$ premières dimensions est:
+    \fleche Il en découle que l'\motcle{inertie} du nuage des observations projeté sur les $q$ premières dimensions est:
     \begin{align*}
         \boldsymbol{I}(\boldsymbol{F}) = \lambda_1 + \dots + \lambda_q.
     \end{align*}
 \end{itemize}
 
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche Les $p =3$ valeurs propres de la matrice de corrélation $\boldsymbol{R}$ sont
+    \begin{code}
+> acp[["eig"]][ , 1]
+   comp 1    comp 2    comp 3 
+1.8326949 0.9897837 0.1775214 
+    \end{code}
+    \fleche Donc
+    \begin{align*}
+        \text{Var}(\boldsymbol{f}^1) &= 1.8327\\
+        \text{Var}(\boldsymbol{f}^2) &= 0.9898
+    \end{align*}
+    \fleche Et l'inertie des 6 observations (pays) projetées sur les $q = 2$ premières dimensions est:
+    \begin{align*}
+        \lambda_1 + \lambda_2 = 1.8327 + 0.9898 = 2.8225.
+    \end{align*}
+\end{itemize}
+
+
 \end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Inertie totale}
+
+\begin{itemize}
+    \fleche En ACP standardisée, l'\motcle{inertie totale} du nuage de points est la somme des variances des colonnes de $\boldsymbol{Z}$:
+    \begin{align*}
+        \boldsymbol{I}(\boldsymbol{Z}) = \sum_{j = 1}^n \text{Var}(\boldsymbol{z}^j) = p.
+    \end{align*}
+    \fleche Lorsque $q = r$ (on choisit autant de composantes principales que le rang de $\boldsymbol{Z}$), l'\motcle{inertie totale} est égale à la somme des variances de toutes les composantes principales:
+    \begin{align*}
+        \boldsymbol{I}(\boldsymbol{F}) = \lambda_1 + \dots + \lambda_r = \boldsymbol{I}(\boldsymbol{Z}) = p.
+    \end{align*}
+\end{itemize}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche L'inertie des 6 observations projetées sur les $q = 3$ axes principaux est:
+    \begin{align*}
+        \boldsymbol{I}(\boldsymbol{F}) = \lambda_1 + \lambda_2 + \lambda_3 = 1.8327 + 0.9898 + 0.1775 = 3.
+    \end{align*}
+\end{itemize}
+
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Qualité de la représentation}
+
+\small
+\begin{itemize}
+    \fleche La \motcle{proportion de l'inertie des données expliquée} par la \motcle{$\alpha^\text{e}$ composante principale} est
+    \begin{align*}
+        \frac{\textbf{Var}(\boldsymbol{f}^\alpha)}{\boldsymbol{I}(\boldsymbol{Z})} = \frac{\lambda_\alpha}{\lambda_1 + \dots + \lambda_r}.
+    \end{align*}
+    \fleche La \motcle{proportion de l'inertie des données expliquée} par les \motcle{$q$ premières composantes principales} est
+    \begin{align*}
+        \frac{\boldsymbol{I}(\boldsymbol{F})}{\boldsymbol{I}(\boldsymbol{Z})} = \frac{\lambda_1 + \dots + \lambda_q}{\lambda_1 + \dots + \lambda_r}.
+    \end{align*}
+\end{itemize}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche Quelle est la proportion de l'inertie expliquée par la première composante principale?
+    \begin{align*}
+        \frac{1.8327}{3} = 61.09\%.
+    \end{align*}
+    \fleche Quelle est la qualité de la représentation des données sur le plan principal?
+    \begin{align*}
+        \frac{1.8327 + 0.9898}{3} = 94.08\%.
+    \end{align*}
+\end{itemize}
+
+\begin{code}
+> acp[["eig"]]
+       eigenvalue percentage of variance cumulative percentage of variance
+comp 1  1.8326949               61.08983                          61.08983
+comp 2  0.9897837               32.99279                          94.08262
+comp 3  0.1775214                5.91738                         100.00000
+\end{code}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Qualité de la représentation}
+
+    \begin{itemize}
+        \fleche La librairie \texttt{factoextra} permet de visualiser les résultats de la fonction \texttt{FactoMineR::PCA}.
+        \fleche On peut ainsi visualiser les valeurs propres avec la commande
+        \small
+        \begin{code}
+library(ggplot2)
+library(factoextra)
+
+fviz_eig(acp)
+        \end{code}
+    \begin{figure}
+        \centering
+        \includegraphics[scale = 0.3]{scree_plot.png}
+    \end{figure}
+    \end{itemize}
+
+\end{frame}
+
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Qualité de la représentation des observations}
+
+\footnotesize
+\begin{itemize}
+    \fleche Si 2 observations sont \motcle{bien projetées}, alors leur distance dans le \motcle{plan de projection} est similaire à leur distance dans $\mathbb{R}^p$.
+    \fleche La \motcle{qualité de la projection de l'observation $i$} sur l'axe $\Delta_\alpha$ est mesurée par le carré du cosinus de l'angle $\theta_{i\alpha}$ formé entre le vecteur $\boldsymbol{z}_i$ et l'axe $\Delta_\alpha$:
+    \begin{align*}
+        \cos^2(\theta_{i\alpha}) = \frac{f_{i\alpha}^2}{||\boldsymbol{z}_i||^2}
+    \end{align*}
+    \fleche La \motcle{qualité de la projection de l'observation $i$} sur le \motcle{plan} ($\Delta_\alpha, \Delta_{\alpha'}$) est mesurée par le carré du cosinus de l'angle $\theta_{i(\alpha, \alpha')}$ entre le point $\boldsymbol{z}_i$ et le plan ($\Delta_\alpha, \Delta_{\alpha'}$):
+    \begin{align*}
+        \cos^2(\theta_{i(\alpha, \alpha')}) = \frac{f_{i\alpha}^2 + f_{i\alpha'}^2}{||\boldsymbol{z}_i||^2}
+    \end{align*}
+    \fleche Plus cette valeur est près de 1, meilleure est la projection.
+\end{itemize}
+
+\begin{alertblock}{Attention!}
+\begin{itemize}
+    \fleche Seules les observations bien projetées peuvent être interprétées.
+\end{itemize}
+\end{alertblock}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche En \texttt{R}, on peut récupérer la qualité de la projection des observations avec la commande suivante:
+    \scriptsize
+    \begin{code}
+> acp$ind$cos2
+               Dim.1      Dim.2        Dim.3
+Belgium    0.4485097 0.30405015 0.2474401363
+Denmark    0.5029432 0.49616937 0.0008873911
+France     0.9064981 0.08074967 0.0127522800
+W. Germany 0.9658347 0.02611438 0.0080508690
+Ireland    0.4009155 0.57728058 0.0218038933
+Italy      0.3071478 0.03871271 0.6541395224
+    \end{code}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Qualité de la représentation des observations}
+
+\small
+\begin{itemize}
+    \fleche On peut visualiser la qualité de la projection des observations avec la fonction \texttt{factoextra::fviz\_cos2}.
+    \fleche Par exemple, sur le plan principal:
+    \begin{code}
+> fviz_cos2(acp, "ind", axes = c(1, 2))
+    \end{code}
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.4]{qualite_repr_ind_plan.png}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{Contribution des observations}
+
+\begin{itemize}
+    \fleche Les observations qui apportent une \motcle{contribution importante} à l'inertie des données projetées sont source d'\motcle{instabilité}.  
+    \fleche L'inertie (la variance) sur l'axe $\boldsymbol{\Delta}_\alpha$ est $\lambda_\alpha = \sum_{i =1}^n w_if_{i\alpha}^2$, avec habituellement $w_i = 1/n \quad \forall i$.
+    \fleche La \motcle{contribution relative} d'une observation $i$ à l'inertie de l'axe $\Delta_\alpha$ est
+    \begin{align*}
+        \text{Ctr}(i, \alpha) = \frac{w_i f_{i\alpha}^2}{\lambda_\alpha}.
+    \end{align*}
+    \fleche La \motcle{contribution relative} d'une observation $i$ à l'inertie du plan $(\Delta_\alpha, \Delta_{\alpha'})$ est
+    \begin{align*}
+        \text{Ctr}(i, (\alpha, \alpha')) = \frac{w_i f_{i\alpha}^2 + w_i f_{i\alpha'}^2}{\lambda_\alpha + \lambda_{\alpha'}}.
+    \end{align*}
+\end{itemize}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche En \texttt{R}, on peut récupérer la contribution des observations à l'inertie des axes principaux avec la commande suivante:
+    \footnotesize
+    \begin{code}
+> acp$ind$contrib
+                Dim.1       Dim.2       Dim.3
+Belgium     7.0498489  8.84918077 40.15295712
+Denmark    20.8493959 38.08503309  0.37977730
+France      0.2689128  0.04435425  0.03905457
+W. Germany 51.0566019  2.55610544  4.39370883
+Ireland    18.7510043 49.99291844 10.52798203
+Italy       2.0242362  0.47240801 44.50652015
+    \end{code}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Contribution des observations}
+
+\small
+\begin{itemize}
+    \fleche On peut visualiser la qualité de la contribution des observations à l'inertie des axes principaux avec la fonction \texttt{factoextra::fviz\_contrib}.
+    \fleche Par exemple, sur le plan principal:
+    \begin{code}
+> fviz_contrib(acp, "ind", axes = c(1, 2))
+    \end{code}
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.4]{contrib_ind_plan.png}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Interprétation du cercle des corrélations}
+
+Si 2 variables sont \motcle{bien projetées}, alors leur \motcle{angle dans le plan de projection} est similaire à celui dans $\mathbb{R}^n$. La corrélation entre ces 2 variables est donc similaire au cosinus de leur angle dans le plan de projection. 
+
+\begin{itemize}
+    \fleche La \motcle{qualité de la projection d'une variable $j$ sur l'axe $G_\alpha$} est mesurée par le carré du cosinus de l'angle $\theta_{j\alpha}$ entre le point $\boldsymbol{z}^j$ et l'axe $G_\alpha$:
+    \begin{align*}
+        \cos^2(\theta_{j\alpha}) = \frac{a_{j\alpha}^2}{||\boldsymbol{z}^j||^2_{\boldsymbol{N}}} = a_{j\alpha}^2.
+    \end{align*}
+    \fleche La \motcle{qualité de la projection d'une variable $j$ sur le plan ($G_\alpha, G_{\alpha'}$)} est mesurée par le carré du cosinus de l'angle $\theta_{j(\alpha, \alpha')}$ entre le point $\boldsymbol{z}^j$ et le plan ($G_\alpha, G_{\alpha'}$):
+    \begin{align*}
+        \cos^2(\theta_{j(\alpha\alpha')}) = a_{j\alpha}^2 + a_{j\alpha'}^2.
+    \end{align*}
+    $\sqrt{\cos^2(\theta_{j(\alpha\alpha')})}$ est alors la \og{}longeur de la flèche\fg{} sur le plan de projection.
+\end{itemize}
+
+Plus la flèche se rapproche du cercle unitaire, plus la qualité de la projection de la variable est élevée.
+
+\begin{alertblock}{Attention!}
+\begin{itemize}
+    \fleche Seules les variables bien projetées peuvent être interprétées.
+\end{itemize}
+\end{alertblock}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation du cercle des corrélations}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche En \texttt{R}, on peut récupérer la qualité de la projection des variables sur les axes principaux avec la commande suivante:
+    \small
+    \begin{code}
+> acp$var$cos2
+        Dim.1        Dim.2      Dim.3
+Agr 0.4192950 5.407909e-01 0.03991412
+Min 0.5027097 4.489915e-01 0.04829884
+Man 0.9106902 1.308793e-06 0.08930845
+    \end{code}
+    \normalsize
+    \fleche Le $\cos^2$ de la variable \texttt{Agr} sur l'axe $G_1$ est $0.4193$.
+    \fleche Le $\cos^2$ de la variable \texttt{Agr} sur le plan $(G_1, G_2)$ est $0.4193 + 0.5408 = 0.9601$.
+    \fleche La variable \texttt{Agr} est donc très bien projetée sur le plan, et la longueur de la flèche sur le cercle des corrélations sera $\sqrt{0.9601} = 0.9798$.
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation du cercle des corrélations}
+
+\begin{code}
+fviz_pca_var(acp, col.var = "cos2")
+\end{code}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.46]{graph_vars_cos2.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche Les variables sont-elles globalement bien projetées sur ce plan?
+    \fleche Interpréter le cercle des corrélations.
+\end{itemize}
+
+\end{frame}
+
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Contribution des variables}
+
+Les variables ayant une \motcle{contribution importante} à l'intertie des données projetées sont utiles pour interpréter les axes principaux. Pour déterminer la contribution d'une variable à un axe (ou un plan), on évalue la proportion de l'inertie totale de l'axe (ou du plan) expliquée par la variable. 
+
+\begin{itemize}
+    \fleche L'inertie totale de l'axe $\Delta_\alpha$ est $\lambda_\alpha = \sum_{j=1}^p a_{j\alpha}^2 = \sum_{j=1}^p \cos^2(\theta_{j\alpha})$.
+    \fleche La contribution relative d'une variable $j$ à l'inertie de l'axe $\Delta_\alpha$ est
+    \begin{align*}
+        \text{Ctr}(j, \alpha) = \frac{a_{j\alpha}^2}{\lambda_\alpha}.
+    \end{align*}
+    \fleche La contribution relative d'une variable $j$ à l'inertie du plan $(\Delta_\alpha, \Delta_{\alpha'})$ est
+    \begin{align*}
+        \text{Ctr}(j, (\alpha, \alpha')) = \frac{a_{j\alpha}^2 + a_{j\alpha'}^2}{\lambda_\alpha + \lambda_{\alpha'}}.
+    \end{align*}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Contribution des variables}
+
+\textbf{Exemple:} extrait d'\texttt{eurojob}
+
+\begin{itemize}
+    \fleche En \texttt{R}, on peut récupérer la contribution relative des variables à l'inertie des axes principaux (en \%) avec la commande suivante:
+    \small
+    \begin{code}
+> acp$var$contrib
+       Dim.1        Dim.2    Dim.3
+Agr 22.87860 5.463728e+01 22.48412
+Min 27.43008 4.536259e+01 27.20733
+Man 49.69132 1.322302e-04 50.30855
+    \end{code}
+    \fleche On peut également visualiser ces contributions sur un graphique:
+    \begin{code}
+> fviz_contrib(acp, "var", axes = 1)
+    \end{code}
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{contrib_var_dim1.png}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation globale (avec un biplot)}
+
+\small
+\begin{code}
+fviz_pca_biplot(acp, pointsize = "cos2", col.var = "cos2")
+\end{code}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{biplot_countries.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche \motcle{Italy} mal projetée: on ne peut pas vraiment l'interpréter sur ce plan.
+    \fleche \motcle{Denmark} a un secteur minier peu développé.
+    \fleche \motcle{W. Germany} a les secteurs minier et manufacturier très développés et un secteur agricole peu développé.
+    \fleche La \motcle{France} est un pays qui se situe dans la moyenne dans les 3 secteurs.
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\section{Application sur un jeu de données}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Jeu de données \og{}températures de France\fg{}}
+
+\footnotesize
+\begin{code}
+library(tidyverse)
+france <- read.table("http://freakonometrics.free.fr/FR_temp.txt", header = TRUE, dec = ",")
+\end{code}
+\normalsize
+    
+\begin{table}
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{l|cccccccccccccccc}
+  \toprule
+ & Jan & Fev & Mar & Avr & Mai & Juin & Juil & Aout & Sep & Oct & Nov & Dec & Lati & Long & Moye & Ampl \\ 
+  \hline
+Bordeaux & 5.60 & 6.60 & 10.30 & 12.80 & 15.80 & 19.30 & 20.90 & 21.00 & 18.60 & 13.80 & 9.10 & 6.20 & 44.50 & -0.34 & 13.33 & 15.40 \\ 
+  Brest & 6.10 & 5.80 & 7.80 & 9.20 & 11.60 & 14.40 & 15.60 & 16.00 & 14.70 & 12.00 & 9.00 & 7.00 & 48.24 & -4.29 & 10.77 & 10.20 \\ 
+  Clermont & 2.60 & 3.70 & 7.50 & 10.30 & 13.80 & 17.30 & 19.40 & 19.10 & 16.20 & 11.20 & 6.60 & 3.60 & 45.47 & 3.05 & 10.94 & 16.80 \\ 
+  Grenoble & 1.50 & 3.20 & 7.70 & 10.60 & 14.50 & 17.80 & 20.10 & 19.50 & 16.70 & 11.40 & 6.50 & 2.30 & 45.10 & 5.43 & 10.98 & 18.60 \\ 
+  Lille & 2.40 & 2.90 & 6.00 & 8.90 & 12.40 & 15.30 & 17.10 & 17.10 & 14.70 & 10.40 & 6.10 & 3.50 & 50.38 & 3.04 & 9.73 & 14.70 \\ 
+  Lyon & 2.10 & 3.30 & 7.70 & 10.90 & 14.90 & 18.50 & 20.70 & 20.10 & 16.90 & 11.40 & 6.70 & 3.10 & 45.45 & 4.51 & 11.36 & 18.60 \\ 
+  Marseille & 5.50 & 6.60 & 10.00 & 13.00 & 16.80 & 20.80 & 23.30 & 22.80 & 19.90 & 15.00 & 10.20 & 6.90 & 43.18 & 5.24 & 14.23 & 17.80 \\ 
+  Montpellier & 5.60 & 6.70 & 9.90 & 12.80 & 16.20 & 20.10 & 22.70 & 22.30 & 19.30 & 14.60 & 10.00 & 6.50 & 43.36 & 3.53 & 13.89 & 17.10 \\ 
+  Nantes & 5.00 & 5.30 & 8.40 & 10.80 & 13.90 & 17.20 & 18.80 & 18.60 & 16.40 & 12.20 & 8.20 & 5.50 & 47.13 & -1.33 & 11.69 & 13.80 \\ 
+  Nice & 7.50 & 8.50 & 10.80 & 13.30 & 16.70 & 20.10 & 22.70 & 22.50 & 20.30 & 16.00 & 11.50 & 8.20 & 43.42 & 7.15 & 14.84 & 15.20 \\ 
+  Paris & 3.40 & 4.10 & 7.60 & 10.70 & 14.30 & 17.50 & 19.10 & 18.70 & 16.00 & 11.40 & 7.10 & 4.30 & 48.52 & 2.20 & 11.18 & 15.70 \\ 
+  Rennes & 4.80 & 5.30 & 7.90 & 10.10 & 13.10 & 16.20 & 17.90 & 17.80 & 15.70 & 11.60 & 7.80 & 5.40 & 48.05 & -1.41 & 11.13 & 13.10 \\ 
+  Strasbourg & 0.40 & 1.50 & 5.60 & 9.80 & 14.00 & 17.20 & 19.00 & 18.30 & 15.10 & 9.50 & 4.90 & 1.30 & 48.35 & 7.45 & 9.72 & 18.60 \\ 
+  Toulouse & 4.70 & 5.60 & 9.20 & 11.60 & 14.90 & 18.70 & 20.90 & 20.90 & 18.30 & 13.30 & 8.60 & 5.50 & 43.36 & 1.26 & 12.68 & 16.20 \\ 
+  Vichy & 2.40 & 3.40 & 7.10 & 9.90 & 13.60 & 17.10 & 19.30 & 18.80 & 16.00 & 11.00 & 6.60 & 3.40 & 46.08 & 3.26 & 10.72 & 16.90 \\ 
+   \bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{itemize}
+    \fleche Jeu de données qui nous renseigne sur la \motcle{température moyenne} pour chaque mois de l'année pour plusieurs villes de France.
+    \fleche On a aussi la position géographique de chaque ville (\motcle{latitude} et \motcle{longitude}) ainsi que la \motcle{température moyenne annuelle} et l'\motcle{amplitude thermique annuelle} (différence entre mois le plus chaud et mois le plus froid).
+\end{itemize}
+    
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+
+\begin{frame}[fragile]{Jeu de données \og{}températures de France\fg{} centré-réduit}
+
+\small
+\begin{itemize}
+    \fleche On va faire une ACP sur le jeu de données centré-réduit, en utilisant seulement les 12 variables des températures moyennes pour chaque mois de l'année.
+    \footnotesize
+    \begin{code}
+centrer_reduire <- function(colonne) {
+  moyenne <- mean(colonne)
+  ecart_type <- sqrt(mean((colonne - moyenne) ^ 2))
+  
+  (colonne - moyenne) / ecart_type
+}
+
+france_norm <- 
+  france %>% 
+  select(Janv:Dece) %>% 
+  mutate_all(centrer_reduire)
+    \end{code}
+\end{itemize}
+
+\vspace{-0.4cm}
+\scriptsize
+\begin{table}
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{l|cccccccccccc}
+  \toprule
+ & Jan & Fev & Mar & Avr & Mai & Juin & Juil & Aout & Sep & Oct & Nov & Dec \\ 
+  \hline
+Bordeaux & 0.84 & 0.98 & 1.40 & 1.33 & 0.94 & 0.85 & 0.52 & 0.74 & 0.90 & 0.84 & 0.67 & 0.72 \\ 
+  Brest & 1.10 & 0.54 & -0.29 & -1.30 & -1.95 & -1.98 & \colorbox{gray!40}{-2.06} & -1.83 & -1.28 & -0.18 & 0.62 & 1.14 \\ 
+  Clermont & -0.71 & -0.63 & -0.50 & -0.50 & -0.44 & -0.31 & -0.21 & -0.24 & -0.44 & -0.63 & -0.76 & -0.66 \\ 
+  Grenoble & -1.28 & -0.90 & -0.36 & -0.28 & 0.05 & -0.02 & 0.13 & -0.03 & -0.16 & -0.52 & -0.82 & -1.35 \\ 
+  Lille & -0.81 & -1.07 & -1.51 & -1.52 & -1.40 & -1.46 & -1.33 & -1.27 & -1.28 & -1.09 & -1.05 & -0.71 \\ 
+  Lyon & -0.97 & -0.85 & -0.36 & -0.06 & 0.32 & 0.38 & 0.42 & 0.27 & -0.05 & -0.52 & -0.70 & -0.92 \\ 
+  Marseille & 0.79 & 0.98 & 1.20 & 1.48 & 1.63 & 1.71 & 1.69 & 1.66 & 1.63 & 1.52 & 1.30 & 1.09 \\ 
+  Montpellier & 0.84 & 1.03 & 1.13 & 1.33 & 1.22 & 1.31 & 1.39 & 1.41 & 1.30 & 1.29 & 1.19 & 0.87 \\ 
+  Nantes & 0.53 & 0.26 & 0.11 & -0.13 & -0.37 & -0.37 & -0.50 & -0.50 & -0.33 & -0.07 & 0.16 & 0.35 \\ 
+  Nice & 1.82 & \colorbox{gray!40}{2.03} & 1.74 & 1.70 & 1.56 & 1.31 & 1.39 & 1.51 & 1.86 & \colorbox{gray!40}{2.08} & \colorbox{gray!40}{2.05} & 1.77 \\ 
+  Paris & -0.30 & -0.41 & -0.43 & -0.20 & -0.09 & -0.19 & -0.36 & -0.45 & -0.55 & -0.52 & -0.47 & -0.29 \\ 
+  Rennes & 0.43 & 0.26 & -0.23 & -0.64 & -0.92 & -0.94 & -0.94 & -0.91 & -0.72 & -0.41 & -0.07 & 0.29 \\ 
+  Strasbourg & -1.84 & -1.85 & -1.78 & -0.86 & -0.30 & -0.37 & -0.41 & -0.65 & -1.06 & -1.60 & -1.74 & -1.87 \\ 
+  Toulouse & 0.37 & 0.42 & 0.65 & 0.45 & 0.32 & 0.50 & 0.52 & 0.69 & 0.74 & 0.55 & 0.39 & 0.35 \\ 
+  Vichy & -0.81 & -0.79 & -0.77 & -0.79 & -0.57 & -0.42 & -0.26 & -0.39 & -0.55 & -0.75 & -0.76 & -0.76 \\ 
+   \bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Graphe des individus}
+
+\small
+\begin{code}
+library(FactoMineR)
+library(factoextra)
+acp <- PCA(france_norm)
+fviz_pca_ind(acp)
+\end{code}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.35]{graph_individuals.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche Excellente qualité de projection (98.82\%), on peut donc \motcle{interpréter sans \og{}danger\fg{}} les distances entre individus.
+    \fleche \motcle{Montpellier} et \motcle{Marseille} proches: signifie que les températures moyennes sont semblables, quel que soit le moment de l'année.
+    \fleche \motcle{Lille} et \motcle{Nice} opposées sur le premier axe: 2 villes très différentes en termes de températures mensuelles moyennes puisque l'axe 1 est celui qui sépare le mieux les points.
+\end{itemize}
+    
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Interprétation du premier axe principal}
+    
+\begin{itemize}
+    \fleche Qu'est-ce qui oppose \motcle{Lille} à \motcle{Nice}?
+    \begin{itemize}
+        \item[-] On peut avoir une bonne connaissance des données et dire qu'à Nice il fait plutôt \motcle{chaud}, alors qu'à Lille, il fait plutôt \motcle{froid}.
+        \item[-] On peut aussi raisonner uniquement à partir de l'ACP: on va alors regarder les \motcle{corrélations} entre les \motcle{variables originales} et les \motcle{composantes principales} $\boldsymbol{f}^1$ et $\boldsymbol{f}^2$.
+    \end{itemize}
+    \fleche Par exemple, si $\text{Cor}(\texttt{janvier}, \boldsymbol{f}^1)$ est \motcle{proche de 1}, ça veut dire que la température en janvier est \motcle{liée positivement} à la coordonnée sur l'axe 1. Dans ce cas:
+    \begin{itemize}
+        \item[-] les villes où il fait \motcle{froid} en janvier ont une \motcle{faible} coordonnée sur l'axe 1 et sont à \motcle{gauche},
+        \item[-] les villes où il fait \motcle{chaud} en janvier ont une \motcle{forte} coordonnée sur l'axe 1 et sont à \motcle{droite}.
+    \end{itemize}
+    \fleche Au contraire, si $\text{Cor}(\texttt{janvier}, \boldsymbol{f}^1)$ est \motcle{proche de -1}, ça veut dire que la température en janvier est \motcle{liée négativement} à la coordonnée sur l'axe 1. Dans ce cas:
+    \begin{itemize}
+        \item[-] les villes où il fait \motcle{froid} en janvier ont une \motcle{forte} coordonnée sur l'axe 1 et sont à \motcle{droite},
+        \item[-] les villes où il fait \motcle{chaud} en janvier ont une \motcle{faible} coordonnée sur l'axe 1 et sont à \motcle{gauche}.
+    \end{itemize}
+    \fleche On va donc regarder le \motcle{cercle des corrélations}.
+\end{itemize}
+    
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation du premier axe principal}
+
+\small
+\begin{code}
+fviz_pca_var(acp)
+\end{code}
+
+\vspace{-0.2cm}
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{graph_variables.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche Toutes les variables sont positivement et assez fortement corrélées à l'axe 1 (corrélation avec l'axe 1 = coordonnée sur l'axe 1).
+    \fleche Les villes à \motcle{gauche} (coordonnée faible sur l'axe 1) sont donc celles où il fait \motcle{froid} tous les mois de l'année, alors que les villes à \motcle{droite} (coordonnée forte sur l'axe 1) sont celles où il fait \motcle{chaud} tous les mois de l'année.\footnote{Relativement aux autres villes du jeu de données}
+    \fleche On peut donc dire que le premier axe \motcle{sépare les villes chaudes des villes froides}. On peut l'interpréter comme la \motcle{moyenne de température annuelle}.
+\end{itemize}
+    
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation du deuxième axe principal}
+
+\small
+\vspace{-0.2cm}
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{graph_variables.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche Les mois d'\motcle{hiver} sont \motcle{positivement corrélés} avec l'axe 2, tandis que les mois d'\motcle{été} sont \motcle{négativement corrélés} avec l'axe 2. 
+    \fleche Les villes en \motcle{haut} (coordonnée forte sur l'axe 2) sont donc celles où il fait plutôt \motcle{chaud l'hiver} et plutôt \motcle{froid l'été} (amplitude thermique faible).
+    \fleche Les villes en \motcle{bas} (coordonnée faible sur l'axe 2) sont donc celles où il fait plutôt \motcle{froid l'hiver} et plutôt \motcle{chaud l'été} (amplitude thermique élevée).
+    \fleche On peut donc interpréter l'axe 2 comme l'\motcle{amplitude thermique}.
+\end{itemize}
+    
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Qualité de la projection des individus}
+
+\begin{code}
+fviz_pca_ind(acp, col.ind = "cos2")
+\end{code}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.35]{graph_ind_cos2.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche \motcle{Paris} est la ville la moins bien projetée. 
+    \fleche Cependant, toutes les villes ont un \motcle{cosinus carré de l'angle avec le plan principal} de \motcle{plus de 0.9}: on peut donc interpréter sans danger toutes les distances.
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Contribution des individus}
+
+\small
+\begin{code}
+fviz_pca_ind(acp, col.ind = "contrib")
+\end{code}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{graph_ind_contrib.png}
+\end{figure}
+
+\begin{itemize}
+    \fleche Les observations avec des coordonnées élevées ont habituellement une plus grande contribution aux axes principaux.
+    \fleche Les observations avec de grandes contributions sont source d'instabilité: si on les retire de l'ACP, ça peut changer les résultats de manière significative.
+        \begin{itemize}
+            \item[-] Si une ou certaines observations ont des contributions très élevées, ça peut être une bonne idée de refaire l'ACP sans celles-ci.
+        \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Interprétation globale (avec un biplot)}
+
+\small
+\begin{code}
+fviz_pca_biplot(acp, pointsize = "cos2", col.var = "cos2")
+\end{code}    
+
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.3]{biplot_villes.png}
+\end{figure}
+
+
+
+\end{frame}
+
 
 % ------------------------------------------------------------------------------------------------------------------------------
 
